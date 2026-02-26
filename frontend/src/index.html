@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMI - Sistema de Mantenimiento</title>
+
+  <link rel="stylesheet" href="index.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <span class="header-ico"><i class="bi bi-tools"></i></span>
+        <div>
+          <h1>SMI - Sistema de Mantenimiento</h1>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span id="countMaquinarias">0</span> Maquinarias
+        </div>
+        <div class="stat">
+          <span id="countSolicitudes">0</span> Solicitudes
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout: Sidebar + Content -->
+    <div class="layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <button class="nav-btn active" data-view="usuarios">
+          <span class="nav-ico"><i class="bi bi-people-fill"></i></span> Usuarios
+        </button>
+        <button class="nav-btn" data-view="maquinaria">
+          <span class="nav-ico"><i class="bi bi-building"></i></span> Maquinaria
+        </button>
+        <button class="nav-btn" data-view="tecnicos">
+          <span class="nav-ico"><i class="bi bi-person-gear"></i></span> Tecnicos
+        </button>
+        <button class="nav-btn" data-view="mantenimiento">
+          <span class="nav-ico"><i class="bi bi-clipboard-check"></i></span> Mantenimiento
+        </button>
+        <button class="nav-btn" data-view="ordenes">
+          <span class="nav-ico"><i class="bi bi-person-workspace"></i></span> Órdenes
+        </button>
+      </aside>
+
+      <!-- Main content -->
+      <main class="content">
+
+        <!-- ============ USUARIOS ============ -->
+        <div class="view active" id="view-usuarios">
+          <section class="form-section">
+            <h2><i class="bi bi-person-plus"></i> Registro / Edición de Usuario</h2>
+
+            <form id="formUsuario">
+              <input type="hidden" id="usrId">
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-person"></i> Nombre</label>
+                  <input id="usrNombre" placeholder="Nombre completo" required>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="bi bi-envelope"></i> Correo</label>
+                  <input id="usrCorreo" type="email" placeholder="correo@empresa.com" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-person-badge"></i> Rol</label>
+                  <select id="usrRol" required>
+                    <option value="operador">Operador</option>
+                    <option value="administrador">Administrador</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="bi bi-shield-lock"></i> Contraseña</label>
+                  <input id="usrPass" type="password" placeholder="••••••••">
+                  <small class="hint">En edición: déjalo vacío para no cambiarla.</small>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn">
+                  <i class="bi bi-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-light" id="btnCancelarUsr">
+                  <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="list-section">
+            <h2><i class="bi bi-list-check"></i> Lista de Usuarios</h2>
+
+            <!-- CONTENEDOR tipo "tutores" -->
+            <div class="list-wrap">
+              <div id="listaUsuarios" class="loading">Cargando usuarios...</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============ MAQUINARIA ============ -->
+        <div class="view" id="view-maquinaria">
+          <section class="form-section">
+            <h2><i class="bi bi-plus-circle"></i> Registro / Edición de Maquinaria</h2>
+
+            <form id="formMaquinaria">
+              <input type="hidden" id="maqId">
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-building"></i> Nombre</label>
+                  <input id="maqNombre" placeholder="Ej: Compresor A1" required>
+                </div>
+                <div class="form-group">
+                  <label><i class="bi bi-tag"></i> Modelo</label>
+                  <input id="maqModelo" placeholder="Ej: XA-200" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-geo-alt"></i> Área</label>
+                  <input id="maqArea" placeholder="Ej: Producción" required>
+                </div>
+                <div class="form-group">
+                  <label><i class="bi bi-activity"></i> Estado</label>
+                  <select id="maqEstado" required>
+                    <option value="activa">Activa</option>
+                    <option value="mantenimiento">En mantenimiento</option>
+                    <option value="fuera_servicio">Fuera de servicio</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn">
+                  <i class="bi bi-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-light" id="btnCancelarMaq">
+                  <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="list-section">
+            <h2><i class="bi bi-list-check"></i> Lista de Maquinaria</h2>
+
+            <div class="list-wrap">
+              <div id="listaMaquinaria" class="loading">Cargando maquinaria...</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============ TECNICOS ============ -->
+        <div class="view" id="view-tecnicos">
+          <section class="form-section">
+            <h2><i class="bi bi-person-gear"></i> Registro / Edición de Técnico</h2>
+
+            <form id="formTecnico">
+              <input type="hidden" id="tecId">
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-person"></i> Nombre</label>
+                  <input id="tecNombre" placeholder="Ej: Juan Pérez" required>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="bi bi-tools"></i> Especialidad</label>
+                  <input id="tecEspecialidad" placeholder="Ej: Mecánico / Eléctrico" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label><i class="bi bi-telephone"></i> Teléfono</label>
+                  <input id="tecTelefono" placeholder="Ej: 5512345678">
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn">
+                  <i class="bi bi-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-light" id="btnCancelarTec">
+                  <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="list-section">
+            <h2><i class="bi bi-list-check"></i> Lista de Técnicos</h2>
+
+            <div class="list-wrap">
+              <div id="listaTecnicos" class="loading">Cargando técnicos...</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============ MANTENIMIENTO ============ -->
+        <div class="view" id="view-mantenimiento">
+          <section class="form-section">
+            <h2><i class="bi bi-wrench-adjustable-circle"></i> Registro / Edición de Mantenimiento</h2>
+
+            <form id="formMantenimiento">
+              <input type="hidden" id="mttoId">
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-building"></i> Maquinaria</label>
+                  <select id="mttoMaquinaria" required>
+                    <option value="">Selecciona...</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="bi bi-person-workspace"></i> Técnico (opcional)</label>
+                  <select id="mttoTecnico" required>
+                    <option value="">Selecciona un técnico...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="bi bi-exclamation-triangle"></i> Prioridad</label>
+                  <select id="mttoPrioridad" required>
+                    <option value="baja">Baja</option>
+                    <option value="media" selected>Media</option>
+                    <option value="alta">Alta</option>
+                    <option value="critica">Crítica</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="bi bi-flag"></i> Estado</label>
+                  <select id="mttoEstado" required>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en_proceso">En proceso</option>
+                    <option value="finalizado">Finalizado</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label><i class="bi bi-card-text"></i> Descripción</label>
+                  <textarea id="mttoDesc" rows="4" placeholder="Describe la falla..." required></textarea>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn">
+                  <i class="bi bi-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-light" id="btnCancelarMtto">
+                  <i class="bi bi-x-circle"></i> Cancelar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="list-section">
+            <h2><i class="bi bi-list-check"></i> Lista de Mantenimientos</h2>
+
+            <div class="list-wrap">
+              <div id="listaMantenimientos" class="loading">Cargando mantenimientos...</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ============ ORDENES ============ -->
+        <div class="view" id="view-ordenes">
+          <section class="form-section">
+            <h2><i class="bi bi-person-workspace"></i> Órdenes por Técnico</h2>
+
+            <form id="formOrdenes">
+              <div class="form-row">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                  <label><i class="bi bi-search"></i> Nombre del Técnico</label>
+                  <input id="ordenTecnicoNombre" placeholder="Ej: Juan Pérez" required>
+                  <small class="hint">Escribe el nombre y presiona Buscar.</small>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button type="submit" class="btn">
+                  <i class="bi bi-search"></i> Buscar
+                </button>
+                <button type="button" class="btn btn-light" id="btnLimpiarOrdenes">
+                  <i class="bi bi-eraser"></i> Limpiar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="list-section">
+            <h2><i class="bi bi-list-check"></i> Órdenes Asignadas</h2>
+
+            <div class="list-wrap">
+              <div id="listaOrdenes" class="loading">
+                Escribe un técnico y presiona Buscar.
+              </div>
+            </div>
+          </section>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
