@@ -36,10 +36,9 @@ const updateMaquinaria = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
     const { nombre, modelo, area, estado } = req.body;
-
     const exist = await Maquinaria.findById(id);
-    if (!exist) return res.status(404).json({ message: 'Maquinaria no encontrada' });
 
+    if (!exist) return res.status(404).json({ message: 'Maquinaria no encontrada' });
     const ok = await Maquinaria.update(id, { nombre, modelo, area, estado });
     if (!ok) return res.status(400).json({ message: 'No se pudo actualizar' });
 
@@ -52,10 +51,8 @@ const updateMaquinaria = async (req, res, next) => {
 const deleteMaquinaria = async (req, res, next) => {
   try {
     console.log('🗑️ DELETE maquinaria ID:', req.params.id);
-
     const ok = await Maquinaria.delete(req.params.id);
     if (!ok) return res.status(404).json({ success: false, message: 'Maquinaria no encontrada' });
-
     res.json({ success: true, message: 'Maquinaria eliminada', deletedId: req.params.id });
   } catch (err) {
     next(err);

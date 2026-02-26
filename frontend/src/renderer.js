@@ -1,8 +1,5 @@
-/* ================================
-   INICIO APP
-================================ */
+// INICIO
 document.addEventListener('DOMContentLoaded', initApp);
-
 async function initApp() {
   console.log('window.smiApp:', window.smiApp);
 
@@ -13,13 +10,10 @@ async function initApp() {
 
   setupNavigation();
   setupEventListeners();
-
   await refrescarTodo();
 }
 
-/* ================================
-   NAVEGACIÓN (VISTAS)
-================================ */
+// VISTAS
 function setupNavigation() {
   const navButtons = document.querySelectorAll('.nav-btn');
   const views = document.querySelectorAll('.view');
@@ -27,19 +21,15 @@ function setupNavigation() {
   navButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const viewName = btn.dataset.view;
-
       navButtons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       views.forEach(v => v.classList.remove('active'));
       document.getElementById(`view-${viewName}`)?.classList.add('active');
     });
   });
 }
 
-/* ================================
-   EVENTOS GENERALES
-================================ */
+// EVENTOS
 function setupEventListeners() {
   document.getElementById('formUsuario')?.addEventListener('submit', handleSaveUsuario);
   document.getElementById('formMaquinaria')?.addEventListener('submit', handleSaveMaquinaria);
@@ -54,9 +44,7 @@ function setupEventListeners() {
   document.getElementById('btnLimpiarOrdenes')?.addEventListener('click', () => limpiarOrdenes());
 }
 
-/* ================================
-   REFRESCAR TODO
-================================ */
+// ACTUALIZAR EN AUTOMATICO
 async function refrescarTodo() {
   await actualizarStats();
   await cargarUsuarios();
@@ -67,9 +55,6 @@ async function refrescarTodo() {
   await cargarMantenimientos();
 }
 
-/* ================================
-   STATS (HEADER)
-================================ */
 async function actualizarStats() {
   try {
     const data = await window.smiApp.getCounts();
@@ -82,9 +67,7 @@ async function actualizarStats() {
   }
 }
 
-/* ================================
-   USUARIOS
-================================ */
+// USUARIOS
 async function cargarUsuarios() {
   const lista = document.getElementById('listaUsuarios');
   lista.className = 'loading';
@@ -92,7 +75,6 @@ async function cargarUsuarios() {
 
   try {
     const usuarios = await window.smiApp.getUsuarios();
-
     if (!usuarios.length) {
       lista.className = 'loading';
       lista.textContent = 'No hay usuarios.';
@@ -129,24 +111,21 @@ async function cargarUsuarios() {
   }
 }
 
-/* ✅ Validación con tooltips + refresco automático */
+// VALIDACION
 async function handleSaveUsuario(e) {
   e.preventDefault();
 
   const form = document.getElementById('formUsuario');
-
   const id = document.getElementById('usrId').value || null;
   const nombre = document.getElementById('usrNombre').value.trim();
   const correo = document.getElementById('usrCorreo').value.trim();
   const rol = document.getElementById('usrRol').value;
   const contrasena = document.getElementById('usrPass').value;
 
-  // ✅ contraseña requerida SOLO al crear
   const passInput = document.getElementById('usrPass');
   if (!id) passInput.setAttribute('required', 'required');
   else passInput.removeAttribute('required');
 
-  // ✅ tooltips nativos por campo
   if (!form.reportValidity()) return;
 
   try {
@@ -161,7 +140,7 @@ async function handleSaveUsuario(e) {
     }
 
     limpiarFormUsuario();
-    await refrescarTodo(); // ✅ refresco total automático
+    await refrescarTodo();
   } catch (e2) {
     alert('Error: ' + e2.message);
   }
@@ -170,7 +149,6 @@ async function handleSaveUsuario(e) {
 function limpiarFormUsuario() {
   document.getElementById('formUsuario')?.reset();
   document.getElementById('usrId').value = '';
-  // opcional: dejar sin required para que no moleste al editar después
   document.getElementById('usrPass')?.removeAttribute('required');
 }
 
@@ -180,7 +158,6 @@ window.editarUsuario = function(id, nombreEnc, correoEnc, rol) {
   document.getElementById('usrCorreo').value = decodeURIComponent(correoEnc);
   document.getElementById('usrRol').value = rol;
   document.getElementById('usrPass').value = '';
-  // al editar no obligamos contraseña
   document.getElementById('usrPass')?.removeAttribute('required');
 };
 
@@ -195,7 +172,7 @@ window.eliminarUsuario = async function(id, nombreEnc) {
       try {
         await window.smiApp.deleteUsuario(id);
         window.smiApp.showNotification?.('🗑️ Usuario eliminado');
-        await refrescarTodo(); // ✅ refresco automático
+        await refrescarTodo();
       } catch (e) {
         alert('Error: ' + e.message);
       }
@@ -203,9 +180,7 @@ window.eliminarUsuario = async function(id, nombreEnc) {
   );
 };
 
-/* ================================
-   MAQUINARIA
-================================ */
+// MAQUINARIA
 async function cargarMaquinaria() {
   const lista = document.getElementById('listaMaquinaria');
   lista.className = 'loading';
@@ -213,7 +188,6 @@ async function cargarMaquinaria() {
 
   try {
     const maq = await window.smiApp.getMaquinaria();
-
     if (!maq.length) {
       lista.className = 'loading';
       lista.textContent = 'No hay maquinaria.';
@@ -251,9 +225,7 @@ async function cargarMaquinaria() {
   }
 }
 
-/* ================================
-   TECNICOS
-================================ */
+// TECNICOS
 async function cargarTecnicos() {
   const lista = document.getElementById('listaTecnicos');
   if (!lista) return;
@@ -321,7 +293,7 @@ async function handleSaveTecnico(e) {
     }
 
     limpiarFormTecnico();
-    await refrescarTodo(); // refresca lista + selects de mantenimiento
+    await refrescarTodo();
 
   } catch (e2) {
     alert('Error: ' + e2.message);
@@ -351,7 +323,7 @@ window.eliminarTecnico = async function(id, nombreEnc) {
       try {
         await window.smiApp.deleteTecnico(id);
         window.smiApp.showNotification?.('🗑️ Técnico eliminado');
-        await refrescarTodo(); // refresca todo
+        await refrescarTodo();
       } catch (e) {
         alert('Error: ' + e.message);
       }
@@ -359,7 +331,6 @@ window.eliminarTecnico = async function(id, nombreEnc) {
   );
 };
 
-/* ✅ Validación con tooltips + refresco automático */
 async function handleSaveMaquinaria(e) {
   e.preventDefault();
 
@@ -382,7 +353,7 @@ async function handleSaveMaquinaria(e) {
     }
 
     limpiarFormMaquinaria();
-    await refrescarTodo(); // ✅ refresco automático
+    await refrescarTodo(); 
   } catch (e2) {
     alert('Error: ' + e2.message);
   }
@@ -420,9 +391,7 @@ window.eliminarMaquinaria = async function(id, nombreEnc) {
   );
 };
 
-/* ================================
-   SELECTS (MANTENIMIENTO)
-================================ */
+// SLECCION DE MANTENIMIENTO
 async function cargarMaquinariaParaSelect() {
   const select = document.getElementById('mttoMaquinaria');
   if (!select) return;
@@ -451,9 +420,7 @@ async function cargarTecnicosParaSelect() {
   }
 }
 
-/* ================================
-   MANTENIMIENTO
-================================ */
+// MANTENIMIENTO
 async function cargarMantenimientos() {
   const lista = document.getElementById('listaMantenimientos');
   lista.className = 'loading';
@@ -500,7 +467,6 @@ async function cargarMantenimientos() {
   }
 }
 
-/* ✅ Validación con tooltips + refresco automático */
 async function handleSaveMantenimiento(e) {
   e.preventDefault();
 
@@ -513,8 +479,6 @@ async function handleSaveMantenimiento(e) {
   const prioridad = document.getElementById('mttoPrioridad').value;
   const estado = document.getElementById('mttoEstado').value;
   const descripcion_falla = document.getElementById('mttoDesc').value.trim();
-
-  // por ahora “usuario logueado”
   const usuario_id = 1;
 
   try {
@@ -536,7 +500,7 @@ async function handleSaveMantenimiento(e) {
     }
 
     limpiarFormMantenimiento();
-    await refrescarTodo(); // ✅ refresco automático
+    await refrescarTodo(); 
   } catch (e2) {
     alert('Error: ' + e2.message);
   }
@@ -565,7 +529,7 @@ window.eliminarMantenimiento = async function(id) {
       try {
         await window.smiApp.deleteMantenimiento(id);
         window.smiApp.showNotification?.('🗑️ Solicitud eliminada');
-        await refrescarTodo(); // ✅ refresco automático
+        await refrescarTodo();
       } catch (e) {
         alert('Error: ' + e.message);
       }
@@ -573,9 +537,7 @@ window.eliminarMantenimiento = async function(id) {
   );
 };
 
-/* ================================
-   ÓRDENES POR TÉCNICO
-================================ */
+// ORDENES
 async function handleBuscarOrdenes(e) {
   e.preventDefault();
 
@@ -624,9 +586,6 @@ function limpiarOrdenes() {
   lista.textContent = 'Escribe un técnico y presiona Buscar.';
 }
 
-/* ================================
-   CONFIRMACIÓN PERSONALIZADA
-================================ */
 function mostrarConfirmacion(titulo, mensaje, callback) {
   const modal = document.createElement('div');
   modal.id = 'modalConfirm';
@@ -666,7 +625,6 @@ function mostrarConfirmacion(titulo, mensaje, callback) {
   `;
 
   document.body.appendChild(modal);
-
   document.getElementById('btnConfirmSi').onclick = () => {
     document.body.removeChild(modal);
     callback(true);
@@ -677,9 +635,6 @@ function mostrarConfirmacion(titulo, mensaje, callback) {
   };
 }
 
-/* ================================
-   UTILS
-================================ */
 function escapeHtml(str) {
   return String(str ?? '')
     .replaceAll('&', '&amp;')

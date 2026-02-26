@@ -2,7 +2,6 @@ const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
 const { spawn } = require('child_process');
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
@@ -11,24 +10,19 @@ let backendProcess = null;
 
 function startBackend() {
   if (backendProcess) return;
-
   const backendPath = path.join(__dirname, '../../backend/server.js');
   const backendCwd = path.join(__dirname, '../../backend');
-
   backendProcess = spawn(process.execPath, [backendPath], {
     cwd: backendCwd,
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: true
   });
-
   backendProcess.stdout.on('data', (data) => {
     console.log(`Backend: ${data.toString()}`);
   });
-
   backendProcess.stderr.on('data', (data) => {
     console.error(`Backend ERROR: ${data.toString()}`);
   });
-
   backendProcess.on('close', (code) => {
     console.log(`Backend finalizó con código: ${code}`);
     backendProcess = null;
@@ -43,13 +37,8 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
-
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
-
-  // Abre DevTools (puedes comentar esta línea cuando ya no lo ocupes)
   mainWindow.webContents.openDevTools();
-
-  // Levantar backend una sola vez
   startBackend();
 };
 
@@ -64,18 +53,15 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  // Detener backend cuando cierres la app (Windows/Linux)
   if (backendProcess) {
     backendProcess.kill();
     backendProcess = null;
   }
-
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-// Extra: asegurar que se cierre backend al salir
 app.on('before-quit', () => {
   if (backendProcess) {
     backendProcess.kill();

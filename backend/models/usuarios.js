@@ -25,7 +25,6 @@ class Usuario {
   }
 
   static async update(id, { nombre, correo, contrasena, rol }) {
-    // Si contrasena viene vacía, NO la actualizamos
     if (contrasena) {
       const [result] = await db.query(
         'UPDATE usuario SET nombre = ?, correo = ?, contrasena = ?, rol = ? WHERE id = ?',

@@ -48,7 +48,6 @@ const updateMantenimiento = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { usuario_id, maquinaria_id, tecnico_id, descripcion_falla, prioridad, estado, fecha_atencion } = req.body;
-
     const [exist] = await pool.query('SELECT id FROM mantenimiento WHERE id = ?', [id]);
     if (exist.length === 0) {
       return res.status(404).json({ error: 'Mantenimiento no encontrado' });
@@ -86,13 +85,12 @@ const updateMantenimiento = async (req, res) => {
 const deleteMantenimiento = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-
     const [result] = await pool.query('DELETE FROM mantenimiento WHERE id = ?', [id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Mantenimiento no encontrado' });
     }
-
+    
     res.json({ success: true, message: 'Mantenimiento eliminado', deletedId: id });
   } catch (error) {
     console.error('ERROR deleteMantenimiento:', error);
