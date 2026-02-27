@@ -4,14 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SMI - Sistema de Mantenimiento</title>
-
   <link rel="stylesheet" href="index.css">
-   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body>
   <div class="app-container">
-
     <!-- Header -->
     <header class="header">
       <div class="header-left">
@@ -52,10 +50,10 @@
 
       <main class="content">
 
-        <!-- ============ USUARIOS ============ -->
+        <!-- USUARIOS -->
         <div class="view active" id="view-usuarios">
           <section class="form-section">
-            <h2><i class="bi bi-person-plus"></i> Registro / Edición de Usuario</h2>
+            <h2><i class="bi bi-person-plus"></i> Registro de Usuario</h2>
 
             <form id="formUsuario">
               <input type="hidden" id="usrId">
@@ -84,7 +82,7 @@
                 <div class="form-group">
                   <label><i class="bi bi-shield-lock"></i> Contraseña</label>
                   <input id="usrPass" type="password" placeholder="••••••••">
-                  <small class="hint">En edición: déjalo vacío para no cambiarla.</small>
+                  <small class="hint">En registro: es obligatoria.</small>
                 </div>
               </div>
 
@@ -108,10 +106,10 @@
           </section>
         </div>
 
-        <!-- ============ MAQUINARIA ============ -->
+        <!-- MAQUINARIA -->
         <div class="view" id="view-maquinaria">
           <section class="form-section">
-            <h2><i class="bi bi-plus-circle"></i> Registro / Edición de Maquinaria</h2>
+            <h2><i class="bi bi-plus-circle"></i> Registro de Maquinaria</h2>
 
             <form id="formMaquinaria">
               <input type="hidden" id="maqId">
@@ -162,10 +160,10 @@
           </section>
         </div>
 
-        <!-- ============ TECNICOS ============ -->
+        <!-- TECNICOS -->
         <div class="view" id="view-tecnicos">
           <section class="form-section">
-            <h2><i class="bi bi-person-gear"></i> Registro / Edición de Técnico</h2>
+            <h2><i class="bi bi-person-gear"></i> Registro de Técnico</h2>
 
             <form id="formTecnico">
               <input type="hidden" id="tecId">
@@ -209,10 +207,10 @@
           </section>
         </div>
 
-        <!-- ============ MANTENIMIENTO ============ -->
+        <!-- MANTENIMIENTO -->
         <div class="view" id="view-mantenimiento">
           <section class="form-section">
-            <h2><i class="bi bi-wrench-adjustable-circle"></i> Registro / Edición de Mantenimiento</h2>
+            <h2><i class="bi bi-wrench-adjustable-circle"></i> Registro de Mantenimiento</h2>
 
             <form id="formMantenimiento">
               <input type="hidden" id="mttoId">
@@ -281,7 +279,7 @@
           </section>
         </div>
 
-        <!-- ============ ORDENES ============ -->
+        <!-- ORDENES -->
         <div class="view" id="view-ordenes">
           <section class="form-section">
             <h2><i class="bi bi-person-workspace"></i> Órdenes por Técnico</h2>
@@ -316,6 +314,223 @@
         </div>
 
       </main>
+    </div>
+  </div>
+
+  <!-- Modal: Usuario -->
+  <div class="modal-overlay" id="modalUsuario">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalUsuarioTitle">
+      <div class="modal-header">
+        <h3 id="modalUsuarioTitle"><i class="bi bi-pencil-square"></i> Editar Usuario</h3>
+        <button type="button" class="modal-close" data-close-modal="modalUsuario" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="formUsuarioEdit">
+        <div class="modal-body">
+          <input type="hidden" id="usrEditId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-person"></i> Nombre</label>
+              <input id="usrEditNombre" placeholder="Nombre completo" required>
+            </div>
+
+            <div class="form-group">
+              <label><i class="bi bi-envelope"></i> Correo</label>
+              <input id="usrEditCorreo" type="email" placeholder="correo@empresa.com" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-person-badge"></i> Rol</label>
+              <select id="usrEditRol" required>
+                <option value="operador">Operador</option>
+                <option value="administrador">Administrador</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label><i class="bi bi-shield-lock"></i> Contraseña (opcional)</label>
+              <input id="usrEditPass" type="password" placeholder="••••••••">
+              <small class="hint">Déjala vacía para no cambiarla.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-light" data-close-modal="modalUsuario">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+          <button type="submit" class="btn">
+            <i class="bi bi-save"></i> Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Maquinaria -->
+  <div class="modal-overlay" id="modalMaquinaria">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalMaquinariaTitle">
+      <div class="modal-header">
+        <h3 id="modalMaquinariaTitle"><i class="bi bi-pencil-square"></i> Editar Maquinaria</h3>
+        <button type="button" class="modal-close" data-close-modal="modalMaquinaria" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="formMaquinariaEdit">
+        <div class="modal-body">
+          <input type="hidden" id="maqEditId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-building"></i> Nombre</label>
+              <input id="maqEditNombre" placeholder="Ej: Compresor A1" required>
+            </div>
+            <div class="form-group">
+              <label><i class="bi bi-tag"></i> Modelo</label>
+              <input id="maqEditModelo" placeholder="Ej: XA-200" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-geo-alt"></i> Área</label>
+              <input id="maqEditArea" placeholder="Ej: Producción" required>
+            </div>
+            <div class="form-group">
+              <label><i class="bi bi-activity"></i> Estado</label>
+              <select id="maqEditEstado" required>
+                <option value="activa">Activa</option>
+                <option value="mantenimiento">En mantenimiento</option>
+                <option value="fuera_servicio">Fuera de servicio</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-light" data-close-modal="modalMaquinaria">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+          <button type="submit" class="btn">
+            <i class="bi bi-save"></i> Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Técnico -->
+  <div class="modal-overlay" id="modalTecnico">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTecnicoTitle">
+      <div class="modal-header">
+        <h3 id="modalTecnicoTitle"><i class="bi bi-pencil-square"></i> Editar Técnico</h3>
+        <button type="button" class="modal-close" data-close-modal="modalTecnico" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="formTecnicoEdit">
+        <div class="modal-body">
+          <input type="hidden" id="tecEditId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-person"></i> Nombre</label>
+              <input id="tecEditNombre" placeholder="Ej: Juan Pérez" required>
+            </div>
+
+            <div class="form-group">
+              <label><i class="bi bi-tools"></i> Especialidad</label>
+              <input id="tecEditEspecialidad" placeholder="Ej: Mecánico / Eléctrico" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label><i class="bi bi-telephone"></i> Teléfono</label>
+              <input id="tecEditTelefono" placeholder="Ej: 5512345678">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-light" data-close-modal="modalTecnico">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+          <button type="submit" class="btn">
+            <i class="bi bi-save"></i> Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Mantenimiento -->
+  <div class="modal-overlay" id="modalMantenimiento">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalMantenimientoTitle">
+      <div class="modal-header">
+        <h3 id="modalMantenimientoTitle"><i class="bi bi-pencil-square"></i> Editar Mantenimiento</h3>
+        <button type="button" class="modal-close" data-close-modal="modalMantenimiento" aria-label="Cerrar">✕</button>
+      </div>
+
+      <form id="formMantenimientoEdit">
+        <div class="modal-body">
+          <input type="hidden" id="mttoEditId">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-building"></i> Maquinaria</label>
+              <select id="mttoEditMaquinaria" required>
+                <option value="">Selecciona...</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label><i class="bi bi-person-workspace"></i> Técnico (opcional)</label>
+              <select id="mttoEditTecnico" required>
+                <option value="">Selecciona un técnico...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="bi bi-exclamation-triangle"></i> Prioridad</label>
+              <select id="mttoEditPrioridad" required>
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+                <option value="critica">Crítica</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label><i class="bi bi-flag"></i> Estado</label>
+              <select id="mttoEditEstado" required>
+                <option value="pendiente">Pendiente</option>
+                <option value="en_proceso">En proceso</option>
+                <option value="finalizado">Finalizado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label><i class="bi bi-card-text"></i> Descripción</label>
+              <textarea id="mttoEditDesc" rows="4" placeholder="Describe la falla..." required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-light" data-close-modal="modalMantenimiento">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+          <button type="submit" class="btn">
+            <i class="bi bi-save"></i> Guardar cambios
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

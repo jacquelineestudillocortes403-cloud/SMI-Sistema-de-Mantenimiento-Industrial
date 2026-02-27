@@ -31,17 +31,41 @@ function setupNavigation() {
 
 // EVENTOS
 function setupEventListeners() {
+  // Formularios de registro
   document.getElementById('formUsuario')?.addEventListener('submit', handleSaveUsuario);
   document.getElementById('formMaquinaria')?.addEventListener('submit', handleSaveMaquinaria);
   document.getElementById('formTecnico')?.addEventListener('submit', handleSaveTecnico);
   document.getElementById('formMantenimiento')?.addEventListener('submit', handleSaveMantenimiento);
   document.getElementById('formOrdenes')?.addEventListener('submit', handleBuscarOrdenes);
 
+  // Formularios modales
+  document.getElementById('formUsuarioEdit')?.addEventListener('submit', handleUpdateUsuarioEdit);
+  document.getElementById('formMaquinariaEdit')?.addEventListener('submit', handleUpdateMaquinariaEdit);
+  document.getElementById('formTecnicoEdit')?.addEventListener('submit', handleUpdateTecnicoEdit);
+  document.getElementById('formMantenimientoEdit')?.addEventListener('submit', handleUpdateMantenimientoEdit);
+
+  // Botones cancelar 
   document.getElementById('btnCancelarUsr')?.addEventListener('click', () => limpiarFormUsuario());
   document.getElementById('btnCancelarMaq')?.addEventListener('click', () => limpiarFormMaquinaria());
   document.getElementById('btnCancelarTec')?.addEventListener('click', () => limpiarFormTecnico());
   document.getElementById('btnCancelarMtto')?.addEventListener('click', () => limpiarFormMantenimiento());
   document.getElementById('btnLimpiarOrdenes')?.addEventListener('click', () => limpiarOrdenes());
+
+  // Cerrar modales
+  document.querySelectorAll('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+  });
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (ev) => {
+      if (ev.target === overlay) closeModal(overlay.id);
+    });
+  });
+
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+  });
 }
 
 // ACTUALIZAR EN AUTOMATICO
@@ -65,6 +89,27 @@ async function actualizarStats() {
     document.getElementById('countMaquinarias').textContent = 0;
     document.getElementById('countSolicitudes').textContent = 0;
   }
+}
+
+// MODALES
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const form = el.querySelector('form');
+  if (form) form.reset();
+
+  el.querySelectorAll('input[type="hidden"]').forEach(h => h.value = '');
+
+  el.classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 // USUARIOS
@@ -111,33 +156,22 @@ async function cargarUsuarios() {
   }
 }
 
-// VALIDACION
 async function handleSaveUsuario(e) {
   e.preventDefault();
 
   const form = document.getElementById('formUsuario');
-  const id = document.getElementById('usrId').value || null;
   const nombre = document.getElementById('usrNombre').value.trim();
   const correo = document.getElementById('usrCorreo').value.trim();
   const rol = document.getElementById('usrRol').value;
   const contrasena = document.getElementById('usrPass').value;
-
   const passInput = document.getElementById('usrPass');
-  if (!id) passInput.setAttribute('required', 'required');
-  else passInput.removeAttribute('required');
+  passInput.setAttribute('required', 'required');
 
   if (!form.reportValidity()) return;
 
   try {
-    if (id) {
-      const data = { nombre, correo, rol };
-      if (contrasena) data.contrasena = contrasena;
-      await window.smiApp.updateUsuario(id, data);
-      window.smiApp.showNotification?.('✅ Usuario actualizado');
-    } else {
-      await window.smiApp.createUsuario({ nombre, correo, rol, contrasena });
-      window.smiApp.showNotification?.('✅ Usuario creado');
-    }
+    await window.smiApp.createUsuario({ nombre, correo, rol, contrasena });
+    window.smiApp.showNotification?.('✅ Usuario creado');
 
     limpiarFormUsuario();
     await refrescarTodo();
@@ -149,17 +183,45 @@ async function handleSaveUsuario(e) {
 function limpiarFormUsuario() {
   document.getElementById('formUsuario')?.reset();
   document.getElementById('usrId').value = '';
-  document.getElementById('usrPass')?.removeAttribute('required');
+  document.getElementById('usrPass')?.setAttribute('required', 'required');
 }
 
+// Modal usuario
 window.editarUsuario = function(id, nombreEnc, correoEnc, rol) {
-  document.getElementById('usrId').value = id;
-  document.getElementById('usrNombre').value = decodeURIComponent(nombreEnc);
-  document.getElementById('usrCorreo').value = decodeURIComponent(correoEnc);
-  document.getElementById('usrRol').value = rol;
-  document.getElementById('usrPass').value = '';
-  document.getElementById('usrPass')?.removeAttribute('required');
+  document.getElementById('usrEditId').value = id;
+  document.getElementById('usrEditNombre').value = decodeURIComponent(nombreEnc);
+  document.getElementById('usrEditCorreo').value = decodeURIComponent(correoEnc);
+  document.getElementById('usrEditRol').value = rol;
+  document.getElementById('usrEditPass').value = '';
+
+  openModal('modalUsuario');
 };
+
+async function handleUpdateUsuarioEdit(e) {
+  e.preventDefault();
+
+  const form = document.getElementById('formUsuarioEdit');
+  if (!form.reportValidity()) return;
+
+  const id = document.getElementById('usrEditId').value;
+  const nombre = document.getElementById('usrEditNombre').value.trim();
+  const correo = document.getElementById('usrEditCorreo').value.trim();
+  const rol = document.getElementById('usrEditRol').value;
+  const contrasena = document.getElementById('usrEditPass').value;
+
+  try {
+    const data = { nombre, correo, rol };
+    if (contrasena) data.contrasena = contrasena;
+
+    await window.smiApp.updateUsuario(id, data);
+    window.smiApp.showNotification?.('✅ Usuario actualizado');
+
+    closeModal('modalUsuario');
+    await refrescarTodo();
+  } catch (e2) {
+    alert('Error: ' + e2.message);
+  }
+}
 
 window.eliminarUsuario = async function(id, nombreEnc) {
   const nombre = decodeURIComponent(nombreEnc);
@@ -225,6 +287,87 @@ async function cargarMaquinaria() {
   }
 }
 
+// Registro de maquinaria
+async function handleSaveMaquinaria(e) {
+  e.preventDefault();
+
+  const form = document.getElementById('formMaquinaria');
+  if (!form.reportValidity()) return;
+
+  const nombre = document.getElementById('maqNombre').value.trim();
+  const modelo = document.getElementById('maqModelo').value.trim();
+  const area = document.getElementById('maqArea').value.trim();
+  const estado = document.getElementById('maqEstado').value;
+
+  try {
+    await window.smiApp.createMaquinaria({ nombre, modelo, area, estado });
+    window.smiApp.showNotification?.('✅ Maquinaria creada');
+
+    limpiarFormMaquinaria();
+    await refrescarTodo();
+  } catch (e2) {
+    alert('Error: ' + e2.message);
+  }
+}
+
+function limpiarFormMaquinaria() {
+  document.getElementById('formMaquinaria')?.reset();
+  document.getElementById('maqId').value = '';
+}
+
+// Modal Maquinaria
+window.editarMaquinaria = function(id, nEnc, modEnc, areaEnc, estEnc) {
+  document.getElementById('maqEditId').value = id;
+  document.getElementById('maqEditNombre').value = decodeURIComponent(nEnc);
+  document.getElementById('maqEditModelo').value = decodeURIComponent(modEnc);
+  document.getElementById('maqEditArea').value = decodeURIComponent(areaEnc);
+  document.getElementById('maqEditEstado').value = decodeURIComponent(estEnc);
+
+  openModal('modalMaquinaria');
+};
+
+async function handleUpdateMaquinariaEdit(e) {
+  e.preventDefault();
+
+  const form = document.getElementById('formMaquinariaEdit');
+  if (!form.reportValidity()) return;
+
+  const id = document.getElementById('maqEditId').value;
+  const nombre = document.getElementById('maqEditNombre').value.trim();
+  const modelo = document.getElementById('maqEditModelo').value.trim();
+  const area = document.getElementById('maqEditArea').value.trim();
+  const estado = document.getElementById('maqEditEstado').value;
+
+  try {
+    await window.smiApp.updateMaquinaria(id, { nombre, modelo, area, estado });
+    window.smiApp.showNotification?.('✅ Maquinaria actualizada');
+
+    closeModal('modalMaquinaria');
+    await refrescarTodo();
+  } catch (e2) {
+    alert('Error: ' + e2.message);
+  }
+}
+
+window.eliminarMaquinaria = async function(id, nombreEnc) {
+  const nombre = decodeURIComponent(nombreEnc);
+
+  mostrarConfirmacion(
+    'Eliminar Maquinaria',
+    `¿Seguro que deseas eliminar <strong>${escapeHtml(nombre)}</strong>?`,
+    async (ok) => {
+      if (!ok) return;
+      try {
+        await window.smiApp.deleteMaquinaria(id);
+        window.smiApp.showNotification?.('🗑️ Maquinaria eliminada');
+        await refrescarTodo();
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+  );
+};
+
 // TECNICOS
 async function cargarTecnicos() {
   const lista = document.getElementById('listaTecnicos');
@@ -272,29 +415,23 @@ async function cargarTecnicos() {
   }
 }
 
+// egistro de tecnico
 async function handleSaveTecnico(e) {
   e.preventDefault();
 
   const form = document.getElementById('formTecnico');
   if (!form.reportValidity()) return;
 
-  const id = document.getElementById('tecId').value || null;
   const nombre = document.getElementById('tecNombre').value.trim();
   const especialidad = document.getElementById('tecEspecialidad').value.trim();
   const telefono = document.getElementById('tecTelefono').value.trim();
 
   try {
-    if (id) {
-      await window.smiApp.updateTecnico(id, { nombre, especialidad, telefono });
-      window.smiApp.showNotification?.('✅ Técnico actualizado');
-    } else {
-      await window.smiApp.createTecnico({ nombre, especialidad, telefono });
-      window.smiApp.showNotification?.('✅ Técnico creado');
-    }
+    await window.smiApp.createTecnico({ nombre, especialidad, telefono });
+    window.smiApp.showNotification?.('✅ Técnico creado');
 
     limpiarFormTecnico();
     await refrescarTodo();
-
   } catch (e2) {
     alert('Error: ' + e2.message);
   }
@@ -305,12 +442,37 @@ function limpiarFormTecnico() {
   document.getElementById('tecId').value = '';
 }
 
+// Modal tecnico
 window.editarTecnico = function(id, nEnc, espEnc, telEnc) {
-  document.getElementById('tecId').value = id;
-  document.getElementById('tecNombre').value = decodeURIComponent(nEnc);
-  document.getElementById('tecEspecialidad').value = decodeURIComponent(espEnc);
-  document.getElementById('tecTelefono').value = decodeURIComponent(telEnc || '');
+  document.getElementById('tecEditId').value = id;
+  document.getElementById('tecEditNombre').value = decodeURIComponent(nEnc);
+  document.getElementById('tecEditEspecialidad').value = decodeURIComponent(espEnc);
+  document.getElementById('tecEditTelefono').value = decodeURIComponent(telEnc || '');
+
+  openModal('modalTecnico');
 };
+
+async function handleUpdateTecnicoEdit(e) {
+  e.preventDefault();
+
+  const form = document.getElementById('formTecnicoEdit');
+  if (!form.reportValidity()) return;
+
+  const id = document.getElementById('tecEditId').value;
+  const nombre = document.getElementById('tecEditNombre').value.trim();
+  const especialidad = document.getElementById('tecEditEspecialidad').value.trim();
+  const telefono = document.getElementById('tecEditTelefono').value.trim();
+
+  try {
+    await window.smiApp.updateTecnico(id, { nombre, especialidad, telefono });
+    window.smiApp.showNotification?.('✅ Técnico actualizado');
+
+    closeModal('modalTecnico');
+    await refrescarTodo();
+  } catch (e2) {
+    alert('Error: ' + e2.message);
+  }
+}
 
 window.eliminarTecnico = async function(id, nombreEnc) {
   const nombre = decodeURIComponent(nombreEnc);
@@ -331,90 +493,36 @@ window.eliminarTecnico = async function(id, nombreEnc) {
   );
 };
 
-async function handleSaveMaquinaria(e) {
-  e.preventDefault();
-
-  const form = document.getElementById('formMaquinaria');
-  if (!form.reportValidity()) return;
-
-  const id = document.getElementById('maqId').value || null;
-  const nombre = document.getElementById('maqNombre').value.trim();
-  const modelo = document.getElementById('maqModelo').value.trim();
-  const area = document.getElementById('maqArea').value.trim();
-  const estado = document.getElementById('maqEstado').value;
-
-  try {
-    if (id) {
-      await window.smiApp.updateMaquinaria(id, { nombre, modelo, area, estado });
-      window.smiApp.showNotification?.('✅ Maquinaria actualizada');
-    } else {
-      await window.smiApp.createMaquinaria({ nombre, modelo, area, estado });
-      window.smiApp.showNotification?.('✅ Maquinaria creada');
-    }
-
-    limpiarFormMaquinaria();
-    await refrescarTodo(); 
-  } catch (e2) {
-    alert('Error: ' + e2.message);
-  }
-}
-
-function limpiarFormMaquinaria() {
-  document.getElementById('formMaquinaria')?.reset();
-  document.getElementById('maqId').value = '';
-}
-
-window.editarMaquinaria = function(id, nEnc, modEnc, areaEnc, estEnc) {
-  document.getElementById('maqId').value = id;
-  document.getElementById('maqNombre').value = decodeURIComponent(nEnc);
-  document.getElementById('maqModelo').value = decodeURIComponent(modEnc);
-  document.getElementById('maqArea').value = decodeURIComponent(areaEnc);
-  document.getElementById('maqEstado').value = decodeURIComponent(estEnc);
-};
-
-window.eliminarMaquinaria = async function(id, nombreEnc) {
-  const nombre = decodeURIComponent(nombreEnc);
-
-  mostrarConfirmacion(
-    'Eliminar Maquinaria',
-    `¿Seguro que deseas eliminar <strong>${escapeHtml(nombre)}</strong>?`,
-    async (ok) => {
-      if (!ok) return;
-      try {
-        await window.smiApp.deleteMaquinaria(id);
-        window.smiApp.showNotification?.('🗑️ Maquinaria eliminada');
-        await refrescarTodo(); // ✅ refresco automático
-      } catch (e) {
-        alert('Error: ' + e.message);
-      }
-    }
-  );
-};
-
-// SLECCION DE MANTENIMIENTO
+// Mantenimiento
 async function cargarMaquinariaParaSelect() {
-  const select = document.getElementById('mttoMaquinaria');
-  if (!select) return;
+  const selectMain = document.getElementById('mttoMaquinaria');
+  const selectEdit = document.getElementById('mttoEditMaquinaria');
 
   try {
     const maq = await window.smiApp.getMaquinaria();
-    select.innerHTML =
+    const html =
       '<option value="">Selecciona...</option>' +
       maq.map(m => `<option value="${m.id}">${escapeHtml(m.nombre)}</option>`).join('');
+
+    if (selectMain) selectMain.innerHTML = html;
+    if (selectEdit) selectEdit.innerHTML = html;
   } catch (e) {
     console.error('ERROR select maquinaria:', e);
   }
 }
 
 async function cargarTecnicosParaSelect() {
-  const select = document.getElementById('mttoTecnico');
-  if (!select) return;
+  const selectMain = document.getElementById('mttoTecnico');
+  const selectEdit = document.getElementById('mttoEditTecnico');
 
   try {
     const tecnicos = await window.smiApp.getTecnicos();
-    select.innerHTML =
+    const html =
       '<option value="">Selecciona un técnico...</option>' +
       tecnicos.map(t => `<option value="${t.id}">${escapeHtml(t.nombre)}</option>`).join('');
+
+    if (selectMain) selectMain.innerHTML = html;
+    if (selectEdit) selectEdit.innerHTML = html;
   } catch (e) {
     console.error('ERROR select tecnicos:', e);
   }
@@ -467,13 +575,13 @@ async function cargarMantenimientos() {
   }
 }
 
+// Registro de mantenimiento
 async function handleSaveMantenimiento(e) {
   e.preventDefault();
 
   const form = document.getElementById('formMantenimiento');
   if (!form.reportValidity()) return;
 
-  const id = document.getElementById('mttoId').value || null;
   const maquinaria_id = document.getElementById('mttoMaquinaria').value;
   const tecnico_id = document.getElementById('mttoTecnico').value;
   const prioridad = document.getElementById('mttoPrioridad').value;
@@ -491,16 +599,11 @@ async function handleSaveMantenimiento(e) {
       descripcion_falla
     };
 
-    if (id) {
-      await window.smiApp.updateMantenimiento(id, payload);
-      window.smiApp.showNotification?.('✅ Mantenimiento actualizado');
-    } else {
-      await window.smiApp.createMantenimiento(payload);
-      window.smiApp.showNotification?.('✅ Solicitud registrada');
-    }
+    await window.smiApp.createMantenimiento(payload);
+    window.smiApp.showNotification?.('✅ Solicitud registrada');
 
     limpiarFormMantenimiento();
-    await refrescarTodo(); 
+    await refrescarTodo();
   } catch (e2) {
     alert('Error: ' + e2.message);
   }
@@ -511,14 +614,53 @@ function limpiarFormMantenimiento() {
   document.getElementById('mttoId').value = '';
 }
 
-window.editarMantenimiento = function(id, maquinaria_id, tecnico_id, prioridad, estado, descEnc) {
-  document.getElementById('mttoId').value = id;
-  document.getElementById('mttoMaquinaria').value = maquinaria_id;
-  document.getElementById('mttoTecnico').value = tecnico_id ?? '';
-  document.getElementById('mttoPrioridad').value = prioridad;
-  document.getElementById('mttoEstado').value = estado;
-  document.getElementById('mttoDesc').value = decodeURIComponent(descEnc);
+window.editarMantenimiento = async function(id, maquinaria_id, tecnico_id, prioridad, estado, descEnc) {
+  await cargarMaquinariaParaSelect();
+  await cargarTecnicosParaSelect();
+
+  document.getElementById('mttoEditId').value = id;
+  document.getElementById('mttoEditMaquinaria').value = maquinaria_id;
+  document.getElementById('mttoEditTecnico').value = tecnico_id ?? '';
+  document.getElementById('mttoEditPrioridad').value = prioridad;
+  document.getElementById('mttoEditEstado').value = estado;
+  document.getElementById('mttoEditDesc').value = decodeURIComponent(descEnc);
+
+  openModal('modalMantenimiento');
 };
+
+async function handleUpdateMantenimientoEdit(e) {
+  e.preventDefault();
+
+  const form = document.getElementById('formMantenimientoEdit');
+  if (!form.reportValidity()) return;
+
+  const id = document.getElementById('mttoEditId').value;
+  const maquinaria_id = document.getElementById('mttoEditMaquinaria').value;
+  const tecnico_id = document.getElementById('mttoEditTecnico').value;
+  const prioridad = document.getElementById('mttoEditPrioridad').value;
+  const estado = document.getElementById('mttoEditEstado').value;
+  const descripcion_falla = document.getElementById('mttoEditDesc').value.trim();
+  const usuario_id = 1;
+
+  try {
+    const payload = {
+      usuario_id,
+      maquinaria_id: Number(maquinaria_id),
+      tecnico_id: Number(tecnico_id),
+      prioridad,
+      estado,
+      descripcion_falla
+    };
+
+    await window.smiApp.updateMantenimiento(id, payload);
+    window.smiApp.showNotification?.('✅ Mantenimiento actualizado');
+
+    closeModal('modalMantenimiento');
+    await refrescarTodo();
+  } catch (e2) {
+    alert('Error: ' + e2.message);
+  }
+}
 
 window.eliminarMantenimiento = async function(id) {
   mostrarConfirmacion(
@@ -586,6 +728,7 @@ function limpiarOrdenes() {
   lista.textContent = 'Escribe un técnico y presiona Buscar.';
 }
 
+// ELIMINACIÓN
 function mostrarConfirmacion(titulo, mensaje, callback) {
   const modal = document.createElement('div');
   modal.id = 'modalConfirm';
